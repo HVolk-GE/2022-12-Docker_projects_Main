@@ -1,0 +1,8 @@
+/.env*
+/couchdb*
+/data*
+/code/bootstrap.php
+/webserver/backup-files*
+!.keepme
+/.idea
+!.env.dist

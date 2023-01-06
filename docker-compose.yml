@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  apache:
+    image: httpd:alpine
+    container_name: apache
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./code:/var/www/html
+      - ./webserver/httpd.conf:/usr/local/apache2/conf/httpd.conf
+      - ./data/logs:/var/log
+  php:
+    container_name: php
+    user: "1000:1000"
+    build:
+      context: ./webserver
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.1}
+        ENV: ${ENV:-production}
+    volumes:
+      - ./code:/var/www/html
+      - ./webserver/php-ini-overrides.ini:/usr/local/etc/php/conf.d/extra.ini
+      - ./data/logs:/var/log
+  database:
+    image: mariadb:${MARIADB_VERSION:-latest}
+    container_name: mariadb
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - ./data/database:/var/lib/mysql
+  couchdb:
+    image: docker.io/bitnami/couchdb:3
+    environment:
+      - COUCHDB_PASSWORD=couchdb
+    ports:
+      - "5984:5984"
+      - "4369:4369"
+      - "9100:9100"
+    volumes:
+      - ./couchdb/data:/opt/couchdb/data
+networks:
+  webserver:
